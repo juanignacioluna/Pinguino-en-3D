@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Pinguino en 3D</title>
+		<meta charset="utf-8">
+		<style>
+			body {
+				margin: 0;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="three.min.js"></script>
+		<script src="GLTFLoader.js"></script>
+		<script src="FirstPersonControls.js"></script>
+		<script>	
+			var camera, scene, renderer, controls, clock;
+			
+			function setup() {
+				document.body.style.backgroundColor = '#d7f0f7';
+				setupThreeJS();
+				setupWorld();
+				
+				requestAnimationFrame(function animate() {			
+					renderer.render(scene, camera);
+					controls.update(clock.getDelta());
+					requestAnimationFrame(animate);
+				});
+			}
+			
+			function setupThreeJS() {
+				scene = new THREE.Scene();
+				
+				camera = new THREE.PerspectiveCamera(
+					75, window.innerWidth / window.innerHeight, 1, 10000);
+				camera.position.y = 400;
+				camera.position.z = 900;
+				camera.position.x = 0;
+				
+				renderer = new THREE.WebGLRenderer({antialias: true});
+				renderer.setSize(window.innerWidth, window.innerHeight);
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMap.soft = true;
+				renderer.setClearColor( 0x15001c, 1);
+
+				let loader = new THREE.GLTFLoader();
+
+				loader.load('scene.gltf', function(gltf){
+					ping = gltf.scene.children[0];
+					ping.scale.set(200,200,200);
+					ping.position.set(1000,200,900);
+					ping.rotation.z -= 1.55;
+					scene.add(gltf.scene);
+					renderer.render(scene, camera);
+				});
+
+				clock = new THREE.Clock();
+				controls = new THREE.FirstPersonControls(camera);
+				controls.movementSpeed = 300;
+				controls.lookSpeed = 0.5;
+				
+				document.body.appendChild(renderer.domElement);
+			}
+				
+			function setupWorld() {
+	
+				var light = new THREE.DirectionalLight(0xf6e86d, 1.5);			
+				
+				light.castShadow = true;
+				light.shadow.mapSize.width = 2048;
+				light.shadow.mapSize.height = 2048;
+				light.position.set(1000, 2000, 900);
+				light.shadow.camera.far = 2500;
+				light.shadow.camera.left = -500;
+				light.shadow.camera.right = 500;
+				light.shadow.camera.top = 2000;
+				light.shadow.camera.bottom = -1000;
+				light.shadow.darkness = 0.7;		
+				
+				scene.add(light);	
+				scene.add(new THREE.AmbientLight(0x666666));
+
+			}
+			
+			setup();
+		</script>
+	</body>
+</html>
